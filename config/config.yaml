@@ -1,2 +1,2 @@
-:auth_file: '/Users/jrobinson/bokit/config/vbucket.keys'
-:bokit_file_root: '/srv/files'
+:auth_file: '/Users/jrobinson/vbucket/config/vbucket.keys'
+:vbucket_file_root: '/srv/files'

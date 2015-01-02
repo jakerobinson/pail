@@ -1,4 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/../lib/vbucket')
+#!/usr/bin/env ruby
+
+require_relative '../lib/vbucket'
 
 # TODO: SSL
 # TODO: Service setup/init script

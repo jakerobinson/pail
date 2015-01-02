@@ -1,10 +1,10 @@
 require 'sinatra/base'
 require 'sinatra/json'
-require 'rack/ssl'
+#require 'rack/ssl'
 #require 'sinatra/respond_with' #respond with multiple content types
 require 'logger'
-require_relative '../vbucket/configuration'
-require_relative '../vbucket/authentication'
+require_relative 'configuration'
+require_relative 'authentication'
 
 module VBucket
   class Service < Sinatra::Base
@@ -15,15 +15,18 @@ module VBucket
       enable :logging
     end
 
-    def initialize(config = VBucket::Configuration.new, logger = Logger.new(default_log_location))
+    def initialize(
+      config = VBucket::Configuration.new,
+      logger = Logger.new(default_log_location),
+      auth = VBucket::Authentication.new(config.auth_file)
+    )
       super()
       @logger = logger
       @config = config
+      @auth = auth
       @logger.debug "Using Config file: #{@config.config_path}"
       @logger.debug "Using Auth file: #{@config.auth_file}"
       @logger.debug "vBucket File Root: #{@config.vbucket_file_root}"
-
-      @auth = VBucket::Authentication.new(@config.auth_file)
       @logger.debug "Loaded [#{@auth.key_count}] authentication keys."
 
       @vbucket_root = @config.vbucket_file_root
@@ -55,11 +58,12 @@ module VBucket
     head '/:filename' do |filename|
       file = File.join(@vbucket_root, filename)
       halt 404 unless File.exist?(file)
-      send_file file, :filename => filename, :type => 'Application/octet-stream'
+      #TODO: what should this send back?
+      #send_file file, :filename => filename, :type => 'Application/octet-stream'
     end
 
     post '/' do
-      (File.exist? File.join(@vbucket_root, filename)) ? (status 200) : (status 201)
+      (File.exist? File.join(@vbucket_root, params[:file][:tempfile])) ? (status 200) : (status 201)
       File.open(File.join(@vbucket_root, params[:file][:tempfile]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
       body nil
 
@@ -72,14 +76,14 @@ module VBucket
       File.open(File.join(@vbucket_root, filename), 'wb') { |f| f.write(params[:file][:tempfile].read) }
       body nil
 
-      # TODO: PUT Folders?
+      # TODO: PUT Folders? Current thought is no.
       # TODO: Streaming upload?
       # TODO: We need to clean up the file if the transfer is unsuccessful
     end
 
     delete '/:filename' do |filename|
-      (File.exist? File.join(@vbucket_root, filename)) ? (status 200) : (status 404)
-      File.delete(File.join(@vbucket_root, filename))
+      filepath = File.join(@vbucket_root, filename)
+      (File.exist? filepath) ? (File.delete(filepath); status 200) : (status 404)
     end
 
     private

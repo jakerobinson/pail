@@ -24,5 +24,7 @@ module VBucket
       data_
     end
 
+    #TODO: def valid_root?
+
   end
 end
