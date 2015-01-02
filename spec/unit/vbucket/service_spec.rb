@@ -105,7 +105,15 @@ describe 'VBucket::Service' do
 
   describe 'POST' do
 
-    it 'POSTs file to /'
+    it 'POSTs file to /' do
+      test_file = Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__), '../../assets/cat.jpg'), 'image/jpeg', true)
+      allow_any_instance_of(VBucket::Authentication).to receive(:has_permission?) { true }
+      allow(File).to receive(:exist?) { false }
+
+      post '/cat.jpg', {'file' => test_file}, header
+      expect(last_response.status).to eq(201)
+
+    end
 
     it 'responds with 401 when not authenticated' do
       allow_any_instance_of(VBucket::Authentication).to receive(:has_permission?) { false }
@@ -119,11 +127,11 @@ describe 'VBucket::Service' do
 
     it 'PUTs /:filename' do
       allow_any_instance_of(VBucket::Authentication).to receive(:has_permission?) { true }
-      testFile = Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__), '../../assets/cat.jpg'), 'image/jpeg', true)
+      test_file = Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__), '../../assets/cat.jpg'), 'image/jpeg', true)
       allow(File).to receive(:exist?) { false }
       allow(File).to receive(:open) { 4607 }
 
-      put '/cat.jpg', {'file' => testFile}, header
+      put '/cat.jpg', {'file' => test_file}, header
       expect(last_response.status).to eq(201)
     end
 
