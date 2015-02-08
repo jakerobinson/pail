@@ -32,11 +32,14 @@ module VBucket
       log_transaction
     end
 
+
+
     get '/' do
-      files = Dir.glob(File.join(@vbucket_root, '*')).map { |f| "#{request.url}#{f.split('/').last}" }
+      files = file_list
       respond_to do |accept|
         accept.xml { xml_file_list files }
         accept.json { json files }
+        accept.html { files }
       end
     end
 
@@ -95,6 +98,10 @@ module VBucket
 
     def log_transaction
       @logger.debug "#{request.ip} - #{request.request_method} #{request.path} #{request.accept}"
+    end
+
+    def file_list
+      Dir.glob(File.join(@vbucket_root, '*')).map { |f| "#{request.url}#{f.split('/').last}" }
     end
 
   end
