@@ -35,8 +35,8 @@ module VBucket
     get '/' do
       files = Dir.glob(File.join(@vbucket_root, '*')).map { |f| "#{request.url}#{f.split('/').last}" }
       respond_to do |accept|
-        accept.json { json files }
         accept.xml { xml_file_list files }
+        accept.json { json files }
       end
     end
 
