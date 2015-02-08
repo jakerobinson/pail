@@ -1,6 +1,5 @@
 require 'vbucket/version'
 require 'vbucket/service'
-require 'vbucket/authentication'
 require 'vbucket/configuration'
 
 module VBucket

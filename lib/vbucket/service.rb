@@ -1,52 +1,43 @@
 require 'sinatra/base'
 require 'sinatra/json'
 #require 'rack/ssl'
-#require 'sinatra/respond_with' #respond with multiple content types
+require 'sinatra/respond_with' #respond with multiple content types
 require 'logger'
+require 'nokogiri'
 require_relative 'configuration'
-require_relative 'authentication'
 
 module VBucket
   class Service < Sinatra::Base
     #use Rack::SSL #TODO: uncomment when web server is set up with SSL
     helpers Sinatra::JSON
-    #helpers Sinatra::RespondWith #TODO: xml, atom support
+    register Sinatra::RespondWith #TODO: xml, atom support
     configure :production, :development do
       enable :logging
     end
 
     def initialize(
       config = VBucket::Configuration.new,
-      logger = Logger.new(default_log_location),
-      auth = VBucket::Authentication.new(config.auth_file)
+      logger = Logger.new(default_log_location)
     )
       super()
       @logger = logger
       @config = config
-      @auth = auth
       @logger.debug "Using Config file: #{@config.config_path}"
-      @logger.debug "Using Auth file: #{@config.auth_file}"
       @logger.debug "vBucket File Root: #{@config.vbucket_file_root}"
-      @logger.debug "Loaded [#{@auth.key_count}] authentication keys."
 
       @vbucket_root = @config.vbucket_file_root
     end
 
-    def default_log_location
-      File.expand_path(File.join(File.dirname(__FILE__), '../../log/vbucket.log'))
-    end
-
     before do
       log_transaction
-      halt 401 unless @auth.has_permission? auth_token
     end
 
-    get '/' do #:provides => [:json, :xml, :atom] do
+    get '/' do
       files = Dir.glob(File.join(@vbucket_root, '*')).map { |f| "#{request.url}#{f.split('/').last}" }
-      #respond_with files
-      json :files => files
-      #TODO: XML support
-      #TODO: Content type
+      respond_to do |accept|
+        accept.json { json files }
+        accept.xml { xml_file_list files }
+      end
     end
 
     get '/:filename' do |filename|
@@ -57,28 +48,27 @@ module VBucket
 
     head '/:filename' do |filename|
       file = File.join(@vbucket_root, filename)
-      halt 404 unless File.exist?(file)
-      #TODO: what should this send back?
-      #send_file file, :filename => filename, :type => 'Application/octet-stream'
+      File.exist?(file) ? (status 200) : (halt 404)
+      response.headers['Content-Length'] = File.size(file)
     end
 
     post '/' do
-      (File.exist? File.join(@vbucket_root, params[:file][:tempfile])) ? (status 200) : (status 201)
-      File.open(File.join(@vbucket_root, params[:file][:tempfile]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
+      (File.exist? File.join(@vbucket_root, params[:file][:filename])) ? (status 200) : (status 201)
+      File.open(File.join(@vbucket_root, params[:file][:filename]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
       body nil
 
-      # TODO: We need to clean up the file if the transfer is unsuccessful
+      # TODO: Do we need to clean up the file if the transfer is unsuccessful?
       # TODO: rescue IO errors
     end
 
     put('/:filename') do |filename|
       (File.exist? File.join(@vbucket_root, filename)) ? (status 200) : (status 201)
-      File.open(File.join(@vbucket_root, filename), 'wb') { |f| f.write(params[:file][:tempfile].read) }
+      File.open(File.join(@vbucket_root, filename), 'wb') { |file| file.write(request.body.read) }
       body nil
 
       # TODO: PUT Folders? Current thought is no.
       # TODO: Streaming upload?
-      # TODO: We need to clean up the file if the transfer is unsuccessful
+      # TODO: Do we need to clean up the file if the transfer is unsuccessful?
     end
 
     delete '/:filename' do |filename|
@@ -88,9 +78,19 @@ module VBucket
 
     private
 
-    def auth_token
-      auth_header = request.env['HTTP_AUTHORIZATION'] || ''
-      auth_header.split.last
+    def default_log_location
+      File.expand_path(File.join(File.dirname(__FILE__), '../../log/vbucket.log'))
+    end
+
+    def xml_file_list(files)
+      builder = Nokogiri::XML::Builder.new do |xml|
+        xml.files {
+          files.each do |filename|
+            xml.file filename
+          end
+        }
+      end
+      builder.to_xml
     end
 
     def log_transaction

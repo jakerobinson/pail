@@ -1,6 +1,5 @@
 ENV['RACK_ENV'] = 'test'
 require_relative '../lib/vbucket/configuration'
-require_relative '../lib/vbucket/authentication'
 require_relative '../lib/vbucket/service'
 require 'rack/test'
 

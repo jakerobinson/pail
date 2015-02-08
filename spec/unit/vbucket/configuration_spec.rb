@@ -15,7 +15,6 @@ describe 'VBucket::Configuration' do
 
     it 'loads a configuration file' do
       test_config = VBucket::Configuration.new
-      expect(test_config.auth_file).to eq('vbucket.keys')
       expect(test_config.vbucket_file_root).to eq('/example/vbucket/')
     end
 
