@@ -17,4 +17,10 @@ module VBucket
     end
   end
 
+  class CannotAccessShare < VBucket::Exception
+    def initialize(file_path_)
+      super("Directory does not exist or permissions issue: #{file_path_}")
+    end
+  end
+
 end

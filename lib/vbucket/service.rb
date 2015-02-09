@@ -1,6 +1,5 @@
 require 'sinatra/base'
 require 'sinatra/json'
-#require 'rack/ssl'
 require 'sinatra/respond_with' #respond with multiple content types
 require 'logger'
 require 'nokogiri'
@@ -8,9 +7,9 @@ require_relative 'configuration'
 
 module VBucket
   class Service < Sinatra::Base
-    #use Rack::SSL #TODO: uncomment when web server is set up with SSL
+
     helpers Sinatra::JSON
-    register Sinatra::RespondWith #TODO: xml, atom support
+    register Sinatra::RespondWith
     configure :production, :development do
       enable :logging
     end
@@ -23,18 +22,17 @@ module VBucket
       @logger = logger
       @config = config
       @logger.debug "Using Config file: #{@config.config_path}"
-      @logger.debug "vBucket File Root: #{@config.vbucket_file_root}"
+      @logger.debug "vBucket File Root: #{@config.share}"
 
-      @vbucket_root = @config.vbucket_file_root
+      @share = @config.share
     end
 
     before do
       log_transaction
     end
 
-
-
-    get '/' do
+    # TODO: Atom response
+    get '/', provides: [:json, :html, :xml] do
       files = file_list
       respond_to do |accept|
         accept.xml { xml_file_list files }
@@ -44,38 +42,39 @@ module VBucket
     end
 
     get '/:filename' do |filename|
-      file = File.join(@vbucket_root, filename)
+      file = File.join(@share, filename)
       halt 404 unless File.exist?(file)
       send_file file, :filename => filename, :type => 'Application/octet-stream'
     end
 
     head '/:filename' do |filename|
-      file = File.join(@vbucket_root, filename)
+      file = File.join(@share, filename)
       File.exist?(file) ? (status 200) : (halt 404)
       response.headers['Content-Length'] = File.size(file)
     end
 
     post '/' do
-      (File.exist? File.join(@vbucket_root, params[:file][:filename])) ? (status 200) : (status 201)
-      File.open(File.join(@vbucket_root, params[:file][:filename]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
+      (File.exist? File.join(@share, params[:file][:filename])) ? (status 200) : (status 201)
+      File.open(File.join(@share, params[:file][:filename]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
       body nil
 
+      # TODO: post_upload_directive
       # TODO: Do we need to clean up the file if the transfer is unsuccessful?
       # TODO: rescue IO errors
     end
 
     put('/:filename') do |filename|
-      (File.exist? File.join(@vbucket_root, filename)) ? (status 200) : (status 201)
-      File.open(File.join(@vbucket_root, filename), 'wb') { |file| file.write(request.body.read) }
+      (File.exist? File.join(@share, filename)) ? (status 200) : (status 201)
+      File.open(File.join(@share, filename), 'wb') { |file| file.write(request.body.read) }
       body nil
 
-      # TODO: PUT Folders? Current thought is no.
+      # TODO: post_upload_directive
+      # TODO: PUT Folders or Files into folders (for Gem server use case)
       # TODO: Streaming upload?
-      # TODO: Do we need to clean up the file if the transfer is unsuccessful?
     end
 
     delete '/:filename' do |filename|
-      filepath = File.join(@vbucket_root, filename)
+      filepath = File.join(@share, filename)
       (File.exist? filepath) ? (File.delete(filepath); status 200) : (status 404)
     end
 
@@ -101,7 +100,7 @@ module VBucket
     end
 
     def file_list
-      Dir.glob(File.join(@vbucket_root, '*')).map { |f| "#{request.url}#{f.split('/').last}" }
+      Dir.glob(File.join(@share, '*')).map { |f| "#{request.url}#{f.split('/').last}" }
     end
 
   end

@@ -3,19 +3,20 @@ require_relative '../../lib/vbucket'
 
 module VBucket
   class Configuration
-    attr_reader :vbucket_file_root, :config_path
+    attr_reader :share, :config_path
 
-    def initialize(manual_path_ = nil)
-      @config_path = manual_path_ || default_path
+    def initialize(path_ = default_path)
+      @config_path = path_ || default_path
       raise VBucket::MissingConfigFile, @config_path unless File.exist? @config_path
       config_data      = YAML.load_file(@config_path)
-      @vbucket_file_root = chk_data config_data[:vbucket_file_root]
+      @share = chk_data config_data[:share]
+      raise VBucket::CannotAccessShare, @share unless share_exist?(@share)
     end
 
     private
 
     def default_path
-      File.expand_path(File.join(File.dirname(__FILE__), '../../config/config.yaml'))
+      File.expand_path(File.join(File.dirname(__FILE__), '../../config/vbucket.conf'))
     end
 
     def chk_data(data_)
@@ -23,7 +24,9 @@ module VBucket
       data_
     end
 
-    #TODO: def valid_root?
+    def share_exist?(path_)
+      Dir.exist? path_
+    end
 
   end
 end
