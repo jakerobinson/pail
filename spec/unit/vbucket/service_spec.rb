@@ -93,6 +93,8 @@ describe 'VBucket::Service' do
     #   expect(last_response.status).to eq(201)
     # end
 
+    it 'responds with 400 when missing data'
+
   end
 
   describe 'PUT' do

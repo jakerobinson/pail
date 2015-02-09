@@ -54,6 +54,7 @@ module VBucket
     end
 
     post '/' do
+      halt 400 unless params[:file]
       (File.exist? File.join(@share, params[:file][:filename])) ? (status 200) : (status 201)
       File.open(File.join(@share, params[:file][:filename]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
       body nil
