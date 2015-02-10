@@ -4,6 +4,7 @@ require 'sinatra/respond_with' #respond with multiple content types
 require 'logger'
 require 'nokogiri'
 require 'fileutils'
+require 'find'
 require_relative 'configuration'
 
 module VBucket
@@ -32,7 +33,7 @@ module VBucket
       log_transaction
     end
 
-    # TODO: Atom response
+    # TODO: RSS support?
     get '/', provides: [:json, :html, :xml] do
       files = file_list
       respond_to do |accept|
@@ -108,7 +109,8 @@ module VBucket
     end
 
     def file_list
-      Dir.glob(File.join(@share, '**/*')).map { |f| "#{request.url}#{f.split('/').last}" }
+      Find.find(@share)
+      #Dir.glob(File.join(@share, '**/*')).map { |f| "#{request.url}#{f.split('/').last}" }
     end
 
   end
