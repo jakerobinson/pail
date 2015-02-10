@@ -65,7 +65,7 @@ module VBucket
     end
 
     put('/folder/:path') do |path|
-      (Dir.exist? File.join(@share, path) ? (halt 409) : (status 201))
+      (Dir.exist? File.join(@share, path)) ? (halt 409) : (status 201)
       FileUtils.mkdir_p File.join(@share, path)
     end
 
