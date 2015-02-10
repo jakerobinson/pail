@@ -110,7 +110,7 @@ module VBucket
 
     def file_list
       files = []
-      Find.find(@share) { |file| files << file.sub(@share, request.url) }
+      Find.find(@share) { |file| files << File.join(request.url, file.sub(@share, '')) }
       #Dir.glob(File.join(@share, '**/*')).map { |f| "#{request.url}#{f.split('/').last}" }
       files
     end
