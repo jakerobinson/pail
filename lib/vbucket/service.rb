@@ -3,6 +3,7 @@ require 'sinatra/json'
 require 'sinatra/respond_with' #respond with multiple content types
 require 'logger'
 require 'nokogiri'
+require 'fileutils'
 require_relative 'configuration'
 
 module VBucket
@@ -41,15 +42,14 @@ module VBucket
       end
     end
 
-    get '/:filename' do |filename|
-      file = File.join(@share, filename)
-      halt 404 unless File.exist?(file)
-      send_file file, :filename => filename, :type => 'Application/octet-stream'
+    get '/:file_path' do |file_path|
+
+      halt 404 unless File.exist?(absolute_path(file_path))
+      send_file absolute_path(file_path), :filename => File.basename(absolute_path(file_path)), :type => 'Application/octet-stream'
     end
 
-    head '/:filename' do |filename|
-      file = File.join(@share, filename)
-      File.exist?(file) ? (status 200) : (halt 404)
+    head '/:file_path' do |file_path|
+      File.exist?(absolute_path(file_path)) ? (status 200) : (halt 404)
       response.headers['Content-Length'] = File.size(file)
     end
 
@@ -64,9 +64,14 @@ module VBucket
       # TODO: rescue IO errors
     end
 
-    put('/:filename') do |filename|
-      (File.exist? File.join(@share, filename)) ? (status 200) : (status 201)
-      File.open(File.join(@share, filename), 'wb') { |file| file.write(request.body.read) }
+    put('/folder/:path') do |path|
+      (Dir.exist? File.join(@share, path) ? (halt 409) : (status 201))
+      FileUtils.mkdir_p File.join(@share, path)
+    end
+
+    put('/:file_path') do |file_path|
+      (File.exist? absolute_path(file_path)) ? (status 200) : (status 201)
+      File.open(absolute_path(file_path), 'wb') { |file| file.write(request.body.read) }
       body nil
 
       # TODO: post_upload_directive
@@ -74,12 +79,15 @@ module VBucket
       # TODO: Streaming upload?
     end
 
-    delete '/:filename' do |filename|
-      filepath = File.join(@share, filename)
-      (File.exist? filepath) ? (File.delete(filepath); status 200) : (status 404)
+    delete '/:file_path' do |file_path|
+      (File.exist? absolute_path(file_path)) ? (File.delete(absolute_path(file_path)); status 200) : (status 404)
     end
 
     private
+
+    def absolute_path(file_path)
+      File.join(@share, file_path)
+    end
 
     def default_log_location
       File.expand_path(File.join(File.dirname(__FILE__), '../../log/vbucket.log'))
