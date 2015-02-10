@@ -43,7 +43,6 @@ module VBucket
     end
 
     get '/:file_path' do |file_path|
-
       halt 404 unless File.exist?(absolute_path(file_path))
       send_file absolute_path(file_path), :filename => File.basename(absolute_path(file_path)), :type => 'Application/octet-stream'
     end
@@ -109,7 +108,7 @@ module VBucket
     end
 
     def file_list
-      Dir.glob(File.join(@share, '*')).map { |f| "#{request.url}#{f.split('/').last}" }
+      Dir.glob(File.join(@share, '**/*')).map { |f| "#{request.url}#{f.split('/').last}" }
     end
 
   end
