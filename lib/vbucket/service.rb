@@ -111,7 +111,7 @@ module VBucket
     def file_list
       files = []
       Find.find(@share) do |file|
-        if file.directory?
+        if File.directory? file
           files << File.join(file, '/')
         else
           (files << File.join(request.url, file.sub(@share, ''))) unless file == @share
