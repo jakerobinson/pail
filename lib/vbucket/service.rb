@@ -34,25 +34,28 @@ module VBucket
     end
 
     # TODO: RSS support?
-    get '/', provides: [:json, :html, :xml] do
-      files = file_list
-      respond_to do |accept|
-        accept.xml { xml_file_list files }
-        accept.json { json files }
-        accept.html { files }
+    get '/*', provides: [:json, :html, :xml] do
+      halt 404 unless path_exist?
+      if FileTest.file?(absolute_path)
+        send_file absolute_path, :filename => File.basename(absolute_path), :type => 'Application/octet-stream'
+      else
+        respond_with_file_list
       end
     end
 
-    get '/:file_path' do |file_path|
-      halt 404 unless File.exist?(absolute_path(file_path))
-      send_file absolute_path(file_path), :filename => File.basename(absolute_path(file_path)), :type => 'Application/octet-stream'
-    end
+    # get '/:file_path' do |file_path|
+    #   halt 404 unless File.exist?(absolute_path(file_path))
+    #
+    #   send_file absolute_path(file_path), :filename => File.basename(absolute_path(file_path)), :type => 'Application/octet-stream'
+    # end
 
-    head '/:file_path' do |file_path|
-      File.exist?(absolute_path(file_path)) ? (status 200) : (halt 404)
+    head '/*' do
+      File.exist?(absolute_path) ? (status 200) : (halt 404)
       response.headers['Content-Length'] = File.size(file)
     end
 
+    # Upload a file
+    # TODO: We want to POST to specific folders for applications like gem server. (post to /gems/)
     post '/' do
       halt 400 unless params[:file]
       (File.exist? File.join(@share, params[:file][:filename])) ? (status 200) : (status 201)
@@ -64,14 +67,16 @@ module VBucket
       # TODO: rescue IO errors
     end
 
-    put('/folder/:path') do |path|
-      (Dir.exist? File.join(@share, path)) ? (halt 409) : (status 201)
-      FileUtils.mkdir_p File.join(@share, path)
+    # Create a folder path. When specifying nested paths, any missing folders in that path will be created.
+    put('/folder/*') do
+      (Dir.exist? File.join(@share, params[:splat])) ? (halt 409) : (status 201)
+      FileUtils.mkdir_p File.join(@share, params[:splat])
     end
 
-    put('/:file_path') do |file_path|
-      (File.exist? absolute_path(file_path)) ? (status 200) : (status 201)
-      File.open(absolute_path(file_path), 'wb') { |file| file.write(request.body.read) }
+    # Upload a file to specific file path
+    put('/*') do
+      (File.exist? absolute_path) ? (status 200) : (status 201)
+      File.open(absolute_path, 'wb') { |file| file.write(request.body.read) }
       body nil
 
       # TODO: post_upload_directive
@@ -79,14 +84,20 @@ module VBucket
       # TODO: Streaming upload?
     end
 
-    delete '/:file_path' do |file_path|
-      (File.exist? absolute_path(file_path)) ? (File.delete(absolute_path(file_path)); status 200) : (status 404)
+    delete '/*' do
+      halt 404 unless path_exist?
+      File.delete(absolute_path)
+      status 200
     end
 
     private
 
-    def absolute_path(file_path)
-      File.join(@share, file_path)
+    def absolute_path
+      @absolute_path ||= File.join(@share, params[:splat])
+    end
+
+    def path_exist?
+      File.exist?(absolute_path) || File.directory?(absolute_path)
     end
 
     def default_log_location
@@ -108,17 +119,27 @@ module VBucket
       @logger.debug "#{request.ip} - #{request.request_method} #{request.path} #{request.accept}"
     end
 
-    def file_list
-      files = []
-      Find.find(@share) do |file|
-        if File.directory? file
-          files << File.join(file, '/')
-        else
-          (files << File.join(request.url, file.sub(@share, ''))) unless file == @share
+    def respond_with_file_list
+      files = file_list absolute_path
+      respond_to do |accept|
+        accept.xml { xml_file_list files }
+        accept.json { json files }
+        accept.html { files }
+      end
+    end
+
+    def file_list(path)
+      all_entities      = Dir.glob(File.join(path, '*'))
+      listing           = {}
+      listing[:files]   = all_entities.select { |entity| FileTest.file? entity }
+      listing[:folders] = all_entities.select { |entity| FileTest.directory? entity }
+
+      listing.each do |entity_type,list|
+        list.each_index do |index|
+          listing[entity_type][index].sub!(@share, request.url)
         end
       end
-      #Dir.glob(File.join(@share, '**/*')).map { |f| "#{request.url}#{f.split('/').last}" }
-      files
+      listing
     end
 
   end
