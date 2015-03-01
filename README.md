@@ -64,3 +64,8 @@ There is a lot of movement in this area right now and containers are all the rag
 
 ### Vagrant Box Repo
 Hate storing your base Vagrant boxes in Dropbox? I do. vBucket is a great way to keep them organized and accessible.
+
+
+## Features Coming Soon
+* File metadata - add metadata to your files!
+* File query - list files based on metadata!
