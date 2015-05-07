@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in vbucket.gemspec
+# Specify your gem's dependencies in pail.gemspec
 gemspec

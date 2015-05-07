@@ -1,3 +1,3 @@
-require './lib/vbucket'
+require './lib/pail'
 
-run VBucket::Service
+run Pail::Service

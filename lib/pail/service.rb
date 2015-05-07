@@ -7,7 +7,7 @@ require 'fileutils'
 require 'find'
 require_relative 'configuration'
 
-module VBucket
+module Pail
   class Service < Sinatra::Base
 
     helpers Sinatra::JSON
@@ -17,7 +17,7 @@ module VBucket
     end
 
     def initialize(
-      config = VBucket::Configuration.new,
+      config = Pail::Configuration.new,
       logger = Logger.new(default_log_location)
     )
       super()
@@ -101,7 +101,7 @@ module VBucket
     end
 
     def default_log_location
-      File.expand_path(File.join(File.dirname(__FILE__), '../../log/vbucket.log'))
+      File.expand_path(File.join(File.dirname(__FILE__), '../../log/pail.log'))
     end
 
     def xml_file_list(files)

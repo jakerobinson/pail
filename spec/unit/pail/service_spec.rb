@@ -1,25 +1,25 @@
 require_relative '../../spec_helper'
 
-describe 'VBucket::Service' do
+describe 'Pail::Service' do
 
   let(:header) { {'HTTP_AUTHORIZATION' => 'Token 527337312fc400145d75b6d0e3640253', Accept: 'application/json'} }
-  let(:file_list) {%w(/example/vbucket/1.txt /example/vbucket/2.txt /example/vbucket/bar /example/vbucket/baz.jpg /example/vbucket/foo /example/vbucket/qux.pdf)}
+  let(:file_list) {%w(/example/pail/1.txt /example/pail/2.txt /example/pail/bar /example/pail/baz.jpg /example/pail/foo /example/pail/qux.pdf)}
   def app
-    VBucket::Service
+    Pail::Service
   end
 
   before(:example) do
     allow(Dir).to receive(:glob) { file_list }
-    allow(YAML).to receive(:load_file) { {share: '/example/vbucket/'} }
-    allow(File).to receive(:exist?).with('/Users/jrobinson/vbucket/spec/unit/vbucket/../../assets/cat.jpg') { true }
-    allow(File).to receive(:exist?).with('/Users/jrobinson/vbucket/config/vbucket.conf') { true }
-    allow(File).to receive(:exist?).with('/Users/jrobinson/vbucket/lib/vbucket/public') { false }
-    allow(File).to receive(:exist?).with('/example/vbucket/thisShouldBeA404') { false }
+    allow(YAML).to receive(:load_file) { {share: '/example/pail/'} }
+    allow(File).to receive(:exist?).with('/Users/jrobinson/pail/spec/unit/pail/../../assets/cat.jpg') { true }
+    allow(File).to receive(:exist?).with('/Users/jrobinson/pail/config/pail.conf') { true }
+    allow(File).to receive(:exist?).with('/Users/jrobinson/pail/lib/pail/public') { false }
+    allow(File).to receive(:exist?).with('/example/pail/thisShouldBeA404') { false }
     allow(File).to receive(:exist?) { true }
-    allow(FileTest).to receive(:file?).with('/example/vbucket/') { false }
-    allow(FileTest).to receive(:file?).with('/example/vbucket/cat.jpg') { true }
+    allow(FileTest).to receive(:file?).with('/example/pail/') { false }
+    allow(FileTest).to receive(:file?).with('/example/pail/cat.jpg') { true }
     file_list.each { |file| allow(FileTest).to receive(:file?).with(file) { true } }
-    allow_any_instance_of(VBucket::Service).to receive(:send_file) { 'This is a test' }
+    allow_any_instance_of(Pail::Service).to receive(:send_file) { 'This is a test' }
   end
 
   describe 'run' do
@@ -88,8 +88,8 @@ describe 'VBucket::Service' do
     # # # This test is not working due to params not being passed. post using curl works fine.
     # it 'POSTs file to /' do
     #   test_file = Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__), '../../assets/cat.jpg'), 'image/jpeg', true)
-    #   allow_any_instance_of(VBucket::Authentication).to receive(:has_permission?) { true }
-    #   allow(File).to receive(:exist?).with(/\/example\/vbucket\/var\/folders\/.*/) { false }
+    #   allow_any_instance_of(Pail::Authentication).to receive(:has_permission?) { true }
+    #   allow(File).to receive(:exist?).with(/\/example\/pail\/var\/folders\/.*/) { false }
     #   allow(File).to receive(:open)
     #
     #   post '/', {'file' => test_file}, header
@@ -104,7 +104,7 @@ describe 'VBucket::Service' do
 
     it 'PUTs /:filename' do
       test_file = Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__), '../../assets/cat.jpg'), 'image/jpeg', true)
-      allow(File).to receive(:exist?).with('/example/vbucket/cat.jpg') { false }
+      allow(File).to receive(:exist?).with('/example/pail/cat.jpg') { false }
       allow(Dir).to receive(:exist?) { true }
       allow(File).to receive(:open) { 4607 }
 
