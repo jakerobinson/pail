@@ -5,7 +5,6 @@ describe 'Pail::Configuration' do
   before(:each) do
     allow(YAML).to receive(:load_file) {
       {
-        auth_file: 'pail.keys',
         share:     '/example/pail/'
       }
     }
@@ -23,12 +22,6 @@ describe 'Pail::Configuration' do
     it 'raises exception if dir does not exist' do
       allow(Dir).to receive(:exist?).with('/example/pail/') { false }
       expect { Pail::Configuration.new }.to raise_error(Pail::CannotAccessShare)
-    end
-
-    it 'raises an error if required data is missing' do
-      allow(YAML).to receive(:load_file) { {auth_file: 'pail.keys'} } # Missing share
-
-      expect { Pail::Configuration.new }.to raise_error(Pail::MissingConfigData)
     end
 
     it 'raises an error if config file is missing' do

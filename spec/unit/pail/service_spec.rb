@@ -11,9 +11,9 @@ describe 'Pail::Service' do
   before(:example) do
     allow(Dir).to receive(:glob) { file_list }
     allow(YAML).to receive(:load_file) { {share: '/example/pail/'} }
-    allow(File).to receive(:exist?).with('/Users/jrobinson/pail/spec/unit/pail/../../assets/cat.jpg') { true }
-    allow(File).to receive(:exist?).with('/Users/jrobinson/pail/config/pail.conf') { true }
-    allow(File).to receive(:exist?).with('/Users/jrobinson/pail/lib/pail/public') { false }
+    allow(File).to receive(:exist?).with(File.join(File.dirname(__FILE__), '../../assets/cat.jpg')) { true }
+    allow(File).to receive(:exist?).with(File.join(File.dirname(__FILE__),'../../../config/pail.conf')) { true }
+    #allow(File).to receive(:exist?).with(File.join(File.dirname(__FILE__),'/Users/jrobinson/pail/lib/pail/public')) { false }
     allow(File).to receive(:exist?).with('/example/pail/thisShouldBeA404') { false }
     allow(File).to receive(:exist?) { true }
     allow(FileTest).to receive(:file?).with('/example/pail/') { false }

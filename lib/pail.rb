@@ -1,6 +1,8 @@
 require 'pail/version'
 require 'pail/service'
 require 'pail/configuration'
+require 'pail/pfile'
+require 'pail/list'
 
 module Pail
   class Exception < StandardError; end
