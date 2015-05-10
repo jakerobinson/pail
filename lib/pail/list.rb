@@ -1,16 +1,18 @@
+require 'json'
+
 module Pail
   class List
     attr_reader :path
 
     def initialize(path)
-      raise "The path: #{path} is not a valid directory" unless File.directory? path
+      raise "The path: #{path} is not a valid directory" unless Dir.exist? path
       @path = path
     end
 
     def files
-      files = dir.select { |entity| FileTest.file? entity }
+      f = dir.select { |entity| FileTest.file? entity }
       pfiles = {}
-      files.each do |entity_path|
+      f.each do |entity_path|
         pfile = Pail::Pfile.new(entity_path)
         pfiles[File.basename entity_path] = pfile.list
       end
@@ -18,8 +20,18 @@ module Pail
     end
 
     def folders
-      folders = dir.select { |entity| FileTest.directory? entity }
-      folders.map { |f| File.basename f }
+      f_hash = {}
+      f = dir.select { |entity| FileTest.directory? entity }
+      f.map { |f| f_hash[File.basename f] = nil }
+      f_hash
+    end
+
+    def to_hash
+      {:files => self.files, :folders => self.folders}
+    end
+
+    def to_json
+      self.to_hash.to_json
     end
 
     private

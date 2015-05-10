@@ -2,7 +2,7 @@ require_relative '../../spec_helper'
 
 describe 'Pail::Service' do
 
-  let(:header) { {'HTTP_AUTHORIZATION' => 'Token 527337312fc400145d75b6d0e3640253', Accept: 'application/json'} }
+  let(:header) { {Accept: 'application/json'} }
   let(:file_list) {%w(/example/pail/1.txt /example/pail/2.txt /example/pail/bar /example/pail/baz.jpg /example/pail/foo /example/pail/qux.pdf)}
   def app
     Pail::Service
@@ -13,7 +13,6 @@ describe 'Pail::Service' do
     allow(YAML).to receive(:load_file) { {share: '/example/pail/'} }
     allow(File).to receive(:exist?).with(File.join(File.dirname(__FILE__), '../../assets/cat.jpg')) { true }
     allow(File).to receive(:exist?).with(File.join(File.dirname(__FILE__),'../../../config/pail.conf')) { true }
-    #allow(File).to receive(:exist?).with(File.join(File.dirname(__FILE__),'/Users/jrobinson/pail/lib/pail/public')) { false }
     allow(File).to receive(:exist?).with('/example/pail/thisShouldBeA404') { false }
     allow(File).to receive(:exist?) { true }
     allow(FileTest).to receive(:file?).with('/example/pail/') { false }
@@ -34,10 +33,11 @@ describe 'Pail::Service' do
   describe 'GET' do
 
     it 'GETs /' do
+      allow_any_instance_of(Pail::List).to receive(:to_hash) { {:files => {'cat.jpg' => {'foo' => 'foo'}}, :folders => {'moar_cats' => nil}}}
       allow(Dir).to receive(:exist?) { true }
       get '/', nil, header
       expect(last_response).to be_ok
-      expect(last_response.body).to eq('{"files":["http://example.org/1.txt","http://example.org/2.txt","http://example.org/bar","http://example.org/baz.jpg","http://example.org/foo","http://example.org/qux.pdf"],"folders":[]}')
+      expect(last_response.body).to eq('{"files":{"http://example.org/cat.jpg":null},"folders":{"http://example.org/moar_cats":null}}')
     end
 
     it 'GETs /:filename' do

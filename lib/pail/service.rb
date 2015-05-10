@@ -129,17 +129,16 @@ module Pail
     end
 
     def file_list(path)
-      all_entities      = Dir.glob(File.join(path, '*'))
-      listing           = {}
-      listing[:files]   = all_entities.select { |entity| FileTest.file? entity }
-      listing[:folders] = all_entities.select { |entity| FileTest.directory? entity }
+      list = Pail::List.new(path).to_hash
+      modified_list = {:files => {}, :folders => {}}
 
-      listing.each do |entity_type,list|
-        list.each_index do |index|
-          listing[entity_type][index].sub!(@share, request.url)
+      list.each do |entity_type,entity_list|
+        entity_list.each_key do |filename|
+          #list[entity_type][key].sub!(@share, request.url)
+          modified_list[entity_type][File.join(request.url, filename)] = list.delete filename
         end
       end
-      listing
+      modified_list
     end
 
   end

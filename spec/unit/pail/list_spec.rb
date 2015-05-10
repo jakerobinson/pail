@@ -31,11 +31,21 @@ describe 'Pail::List' do
 
     describe '#folders' do
       it 'returns an array' do
-        expect(pail_list.folders).to be_an Array
+        expect(pail_list.folders).to be_a Hash
       end
 
       it 'contains a list of folders' do
-        expect(pail_list.folders).to contain_exactly('moar_cats')
+        expect(pail_list.folders.keys).to contain_exactly('moar_cats')
+      end
+    end
+
+    describe '#to_hash' do
+      it 'returns a hash' do
+        expect(pail_list.to_hash).to be_a Hash
+      end
+
+      it 'contains a list of files and folders' do
+        expect(pail_list.to_hash.keys).to contain_exactly(:files, :folders)
       end
     end
 
