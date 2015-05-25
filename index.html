@@ -4,11 +4,11 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="vBucket : A minimalistic REST API for your files">
+    <meta name="description" content="Pail : A minimalistic REST API for your files">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>vBucket</title>
+    <title>Pail</title>
   </head>
 
   <body>
@@ -16,15 +16,15 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
-          <a id="forkme_banner" href="https://github.com/jakerobinson/vbucket">View on GitHub</a>
+          <a id="forkme_banner" href="https://github.com/jakerobinson/pail">View on GitHub</a>
 
 
-          <h1 id="project_title">vBucket</h1>
+          <h1 id="project_title">Pail</h1>
           <h2 id="project_tagline">A minimalistic REST API for your files</h2>
 
             <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/jakerobinson/vbucket/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/jakerobinson/vbucket/tarball/master">Download this project as a tar.gz file</a>
+              <a class="zip_download_link" href="https://github.com/jakerobinson/pail/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/jakerobinson/pail/tarball/master">Download this project as a tar.gz file</a>
             </section>
         </header>
     </div>
@@ -33,37 +33,37 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h2>
-<a id="what-is-vbucket" class="anchor" href="#what-is-vbucket" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is vBucket?</h2>
+<a id="what-is-pail" class="anchor" href="#what-is-pail" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is Pail?</h2>
 
 
-<p>vBucket is a minimalistic API for your files.</p>
+<p>Pail is a minimalistic API for your files.</p>
 
 <p>It's goal is to provide you with REST access to a directory on your linux filesystem.</p>
 
 <p>You can GET, POST, PUT and DELETE with simple curl commands.</p>
 
 <pre><code># POST a file
-curl -i -F file=@funny_cat.gif http://vbucket.example.com/
+curl -i -F file=@funny_cat.gif http://pail.example.com/
 
 # GET the file
-curl http://vbucket.example.com/funny_cat.gif
+curl http://pail.example.com/funny_cat.gif
 
 # DELETE the file
-curl -X DELETE http://vbucket.example.com/funny_cat.gif
+curl -X DELETE http://pail.example.com/funny_cat.gif
 
 # PUT a file
-curl --upload-file another_cat.gif http://vbucket.example.com/a_specific_cat_file_name.gif
+curl --upload-file another_cat.gif http://pail.example.com/a_specific_cat_file_name.gif
 </code></pre>
 
 <h2>
-<a id="vbucket-vs" class="anchor" href="#vbucket-vs" aria-hidden="true"><span class="octicon octicon-link"></span></a>vBucket vs.</h2>
+<a id="pail-vs" class="anchor" href="#pail-vs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pail vs.</h2>
 
 <h4>
 <a id="object-storage" class="anchor" href="#object-storage" aria-hidden="true"><span class="octicon octicon-link"></span></a>object storage</h4>
 
 <p>Object storage stores data as objects with metadata, identified by a uuid. An API is employed to access the objects.</p>
 
-<p>vBucket is a REST API for a block storage filesystem. It has all the power of an object storage API without
+<p>Pail is a REST API for a block storage filesystem. It has all the power of an object storage API without
 the need for the underlying object storage hardware.</p>
 
 <h4>
@@ -71,7 +71,7 @@ the need for the underlying object storage hardware.</p>
 
 <p>WebDAV(Web Distributed Authoring and Versioning) is a unique protocol with many features for reading and writing documents.</p>
 
-<p>vBucket uses HTTP for all it's communication, providing maximum accessibility to any language or system. POST, PUT, GET, and DELETE are the only methods you need to know.</p>
+<p>Pail uses HTTP for all it's communication, providing maximum accessibility to any language or system. POST, PUT, GET, and DELETE are the only methods you need to know.</p>
 
 <h4>
 <a id="nfs" class="anchor" href="#nfs" aria-hidden="true"><span class="octicon octicon-link"></span></a>nfs</h4>
@@ -79,41 +79,41 @@ the need for the underlying object storage hardware.</p>
 <p>NFS(Network File System) is a distributed, open filesystem protocol that you would mount and treat like a local disk.
 It is extremely valuable if you need complete control over the files and their heirarchy.</p>
 
-<p>vBucket runs over HTTP, so there is no mounting or special ports to open. It works through firewalls, proxies, and NAT.</p>
+<p>Pail runs over HTTP, so there is no mounting or special ports to open. It works through firewalls, proxies, and NAT.</p>
 
 <h4>
 <a id="iscsi" class="anchor" href="#iscsi" aria-hidden="true"><span class="octicon octicon-link"></span></a>iscsi</h4>
 
 <p>iSCSI(Internet Small Computer System Interface) is an IP protocol for sending SCSI commands over the network. You can do everything from mount a disk to boot from iSCSI. It is an extremely powerful storage bus.</p>
 
-<p>vBucket is very lightweight and easy to install. The only requirements to get started are Linux and Ruby.</p>
+<p>Pail is very lightweight and easy to install. The only requirements to get started are Linux and Ruby.</p>
 
 <h2>
 <a id="security" class="anchor" href="#security" aria-hidden="true"><span class="octicon octicon-link"></span></a>Security</h2>
 
-<p>BYO! vBucket does not come with an encryption or authentication mechanism. If you plan on running vBucket over the Internet, its very simple to host behind Apache or Nginx. These web servers can provide basic authentication, SSL, reverse proxy.</p>
+<p>BYO! Pail does not come with an encryption or authentication mechanism. If you plan on running Pail over the Internet, its very simple to host behind Apache or Nginx. These web servers can provide basic authentication, SSL, reverse proxy.</p>
 
 <p>For detailed instructions on how to set up SSL and authentication, refer to the wiki.</p>
 
 <h2>
-<a id="applying-vbucket-to-your-operations" class="anchor" href="#applying-vbucket-to-your-operations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Applying vBucket to your operations</h2>
+<a id="applying-pail-to-your-operations" class="anchor" href="#applying-pail-to-your-operations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Applying Pail to your operations</h2>
 
 <h4>
 <a id="file-server" class="anchor" href="#file-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>File Server</h4>
 
-<p>At it's core, vBucket is designed to serve up files. If you want to host files that are accessible via REST API, you can simply run vBucket as a service and point it at a directory on your linux system. You can upload and download files over HTTP with a multitude of languages, libraries and tools.</p>
+<p>At it's core, Pail is designed to serve up files. If you want to host files that are accessible via REST API, you can simply run Pail as a service and point it at a directory on your linux system. You can upload and download files over HTTP with a multitude of languages, libraries and tools.</p>
 
 <h4>
 <a id="yumapt-repo" class="anchor" href="#yumapt-repo" aria-hidden="true"><span class="octicon octicon-link"></span></a>YUM/APT Repo</h4>
 
-<p>vBucket can serve as a repo for linux packages. GET requests from <code>yum</code> or <code>apt-get</code> to the API are easy for vBucket.</p>
+<p>Pail can serve as a repo for linux packages. GET requests from <code>yum</code> or <code>apt-get</code> to the API are easy for Pail.</p>
 
-<p>You can also publish new packages to your repo by doing a POST or PUT. vBucket can be configured with a <code>post_upload</code> script to run repo indexing commands after an upload has completed.</p>
+<p>You can also publish new packages to your repo by doing a POST or PUT. Pail can be configured with a <code>post_upload</code> script to run repo indexing commands after an upload has completed.</p>
 
 <h4>
 <a id="gem-server" class="anchor" href="#gem-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>Gem Server</h4>
 
-<p>In addition to Linux repos, you can also serve gems from vBucket. Simply use the <code>post_upload</code> in the configuration to perform a <code>gem generate_index</code> on your vBucket directory.</p>
+<p>In addition to Linux repos, you can also serve gems from Pail. Simply use the <code>post_upload</code> in the configuration to perform a <code>gem generate_index</code> on your Pail directory.</p>
 
 <h4>
 <a id="container-repo" class="anchor" href="#container-repo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Container Repo</h4>
@@ -123,14 +123,14 @@ It is extremely valuable if you need complete control over the files and their h
 <h4>
 <a id="vagrant-box-repo" class="anchor" href="#vagrant-box-repo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Vagrant Box Repo</h4>
 
-<p>Hate storing your base Vagrant boxes in Dropbox? I do. vBucket is a great way to keep them organized and accessible.</p>
+<p>Hate storing your base Vagrant boxes in Dropbox? I do. Pail is a great way to keep them organized and accessible.</p>
       </section>
     </div>
 
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        <p class="copyright">vBucket maintained by <a href="https://github.com/jakerobinson">jakerobinson</a></p>
+        <p class="copyright">Pail maintained by <a href="https://github.com/jakerobinson">jakerobinson</a></p>
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
