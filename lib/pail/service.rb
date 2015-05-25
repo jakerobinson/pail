@@ -43,23 +43,21 @@ module Pail
       end
     end
 
-    # get '/:file_path' do |file_path|
-    #   halt 404 unless File.exist?(absolute_path(file_path))
-    #
-    #   send_file absolute_path(file_path), :filename => File.basename(absolute_path(file_path)), :type => 'Application/octet-stream'
-    # end
-
     head '/*' do
       File.exist?(absolute_path) ? (status 200) : (halt 404)
       response.headers['Content-Length'] = File.size(file)
     end
 
     # Upload a file
-    # TODO: We want to POST to specific folders for applications like gem server. (post to /gems/)
-    post '/' do
+    post '/*' do
       halt 400 unless params[:file]
-      (File.exist? File.join(@share, params[:file][:filename])) ? (status 200) : (status 201)
-      File.open(File.join(@share, params[:file][:filename]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
+      (File.exist? File.join(@share, params[:splat], params[:file][:filename])) ? (status 200) : (status 201)
+      File.open(File.join(@share, params[:splat], params[:file][:filename]), 'wb') { |f| f.write(params[:file][:tempfile].read) }
+      pail_file = Pail::Pfile.new(File.join(@share, params[:splat], params[:file][:filename]))
+      if params[:metadata]
+        metadata = JSON::load(params[:metadata]).to_h
+        pail_file.add metadata
+      end
       body nil
 
       # TODO: post_upload_directive
@@ -79,9 +77,9 @@ module Pail
       File.open(absolute_path, 'wb') { |file| file.write(request.body.read) }
       body nil
 
+      # TODO: Write file metadata? Can I do this with a PUT?
       # TODO: post_upload_directive
       # TODO: PUT Folders or Files into folders (for Gem server use case)
-      # TODO: Streaming upload?
     end
 
     delete '/*' do
@@ -104,10 +102,10 @@ module Pail
       File.expand_path(File.join(File.dirname(__FILE__), '../../log/pail.log'))
     end
 
-    def xml_file_list(files)
+    def xml_file_list(file_list)
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.files {
-          files.each do |filename|
+          file_list[:files].each do |filename|
             xml.file filename
           end
         }
@@ -124,19 +122,16 @@ module Pail
       respond_to do |accept|
         accept.xml { xml_file_list files }
         accept.json { json files }
-        accept.html { files }
+        accept.html { files.to_s }
       end
     end
 
     def file_list(path)
-      list = Pail::List.new(path).to_hash
-      modified_list = {:files => {}, :folders => {}}
+      list          = Pail::List.new(path).to_hash
+      modified_list = {files: {}, folders: {}}
 
-      list.each do |entity_type,entity_list|
-        entity_list.each_key do |filename|
-          #list[entity_type][key].sub!(@share, request.url)
-          modified_list[entity_type][File.join(request.url, filename)] = list.delete filename
-        end
+      list.each do |entity_type, entity_list|
+        entity_list.map { |filename,_| modified_list[entity_type][File.join(request.url, filename)] = list[entity_type].delete filename }
       end
       modified_list
     end
